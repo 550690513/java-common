@@ -8,6 +8,8 @@
 | --- | --- |
 | `zhe-log-spring-boot-starter` | 方法日志打印：`@LogPrint` / `@RequestLog` / `@ResponseLog` |
 
+> groupId 为 `io.github.550690513`（Maven Central 的 GitHub 命名空间），代码包名保持 `com.zhe.*`。
+
 ## zhe-log-spring-boot-starter
 
 基于 AOP 的方法日志打印 starter，引入依赖后自动装配，注解标注即生效。
@@ -16,14 +18,14 @@
 
 ```xml
 <dependency>
-    <groupId>com.zhe</groupId>
+    <groupId>io.github.550690513</groupId>
     <artifactId>zhe-log-spring-boot-starter</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
 
 > 兼容 Spring Boot 2.7+ / 3.x（同时提供 `spring.factories` 与 `AutoConfiguration.imports` 两种注册方式），Java 8+。
-> 当前通过 `mvn clean install` 安装到本地仓库后引用；如需发布到 Maven Central，后续补充 GPG 签名与 distributionManagement 配置。
+> 未发布前可通过 `mvn clean install` 安装到本地仓库引用；发布到 Maven Central 见下文[发布流程](#发布到-maven-central)。
 
 ### 注解说明
 
@@ -106,6 +108,46 @@ zhe:
 ### 自定义切面
 
 starter 中的三个切面均以 `@ConditionalOnMissingBean` 注册，宿主应用声明自己的同名类型 Bean 即可完全替换。
+
+## 发布到 Maven Central
+
+首次发布前需要完成一次性配置：
+
+1. **注册 [Maven Central Portal](https://central.sonatype.com)** 账号
+2. **验证命名空间** `io.github.550690513`：在 Portal 的 Namespaces 页面添加，按提示在 GitHub 账号下创建同名验证仓库后点击验证
+3. **生成 Portal Token**：Portal 账号设置中生成 user token，配置到 `~/.m2/settings.xml`：
+
+```xml
+<servers>
+    <server>
+        <id>central</id>
+        <username>Portal Token 用户名</username>
+        <password>Portal Token 密码</password>
+    </server>
+</servers>
+```
+
+4. **准备 GPG 密钥**（Central 要求所有构件带签名）：
+
+```bash
+gpg --full-generate-key                                # RSA 4096，姓名/邮箱与 pom 中 developers 一致
+gpg --list-keys --keyid-format long                    # 记下 KEYID
+gpg --keyserver keyserver.ubuntu.com --send-keys <KEYID>   # 公钥发布到密钥服务器供 Central 校验
+```
+
+之后每次发版：
+
+```bash
+mvn clean deploy -Prelease
+```
+
+构建会自动附加 sources jar、javadoc jar 并做 GPG 签名，上传后 Portal 校验通过即自动发布（约 10-30 分钟内可在 central.sonatype.com 与镜像站检索到）。
+
+本地验证发布产物（不签名、不上传）：
+
+```bash
+mvn clean package -Prelease -Dgpg.skip=true
+```
 
 ## License
 

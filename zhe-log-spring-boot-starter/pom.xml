@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.zhe</groupId>
+        <groupId>io.github.550690513</groupId>
         <artifactId>java-common</artifactId>
         <version>1.0.0</version>
     </parent>
